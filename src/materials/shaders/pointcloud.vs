@@ -16,6 +16,7 @@ attribute float returnNumber;
 attribute float numberOfReturns;
 attribute float pointSourceID;
 attribute vec4 indices;
+attribute float random;
 //attribute float indices;
 
 uniform mat4 modelMatrix;
@@ -443,6 +444,44 @@ void main() {
 		}
 	#endif
 
-	//vColor = indices.rgb * 255.0;
+	
+	
+	//float d = length(gl_Position.xy / gl_Position.w);
+	//float depth = -mvPosition.z;
+	//float w = exp(-(d * d) * 1.0);
+    ////w = 1.0;
+	//float targetSpacing = (depth  / 500.0) / w;
+	//float localSpacing = spacing / pow(2.0, level);
+	//
+	//if(localSpacing < targetSpacing * pow(random, 0.2)){
+    //    //vColor = vec3(1.0, 1.0, 1.0);
+	//	gl_Position.w = 0.0;
+	//}
+	
+	float d = length(gl_Position.xy / gl_Position.w);
+	float depth = -mvPosition.z;
+	float w = exp(-(d * d) * 1.0);
+    w = 1.0;
+	float targetSpacing = (depth  / 500.0) / w;
+	float localSpacing = spacing / pow(2.0, level);
+	
+	if(localSpacing < targetSpacing * pow(random, 0.02)){
+        vColor = vec3(1.0, 0.0, 0.0);
+		gl_Position.w = 0.0;
+	}else{
+		gl_PointSize = gl_PointSize * 2.0;
+	}
+	
+	
 	
 }
+
+
+
+
+
+
+
+
+
+

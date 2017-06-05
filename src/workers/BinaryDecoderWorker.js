@@ -207,11 +207,15 @@ onmessage = function(event){
 	}
 
 	let indices = new ArrayBuffer(numPoints*4);
-	//let fIndices = new Float32Array(indices);
 	let iIndices = new Uint32Array(indices);
 	for(let i = 0; i < numPoints; i++){
 		iIndices[i] = i;
-		//fIndices[i] = i;
+	}
+	
+	let random = new ArrayBuffer(numPoints*4);
+	let fRandom = new Float32Array(random);
+	for(let i = 0; i < numPoints; i++){
+		fRandom[i] = Math.random();
 	}
 	
 	if(attributeBuffers[Potree.PointAttribute.CLASSIFICATION.name] === undefined){
@@ -228,7 +232,8 @@ onmessage = function(event){
 	let message = {
 		attributeBuffers: attributeBuffers,
 		tightBoundingBox: { min: tightBoxMin, max: tightBoxMax },
-		indices: indices
+		indices: indices,
+		random: random
 	};
 
 	let transferables = [];

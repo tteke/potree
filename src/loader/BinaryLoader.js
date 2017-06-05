@@ -94,6 +94,9 @@ Potree.BinaryLoader.prototype.parse = function(node, buffer){
 		let indicesAttribute = new THREE.Uint8BufferAttribute(data.indices, 4);
 		indicesAttribute.normalized = true;
 		geometry.addAttribute("indices", indicesAttribute);
+		
+		let randomAttribute = new THREE.Float32BufferAttribute(data.random, 1);
+		geometry.addAttribute("random", randomAttribute);
 
 		if(!geometry.attributes.normal){
 			let buffer = new Float32Array(numPoints*3);

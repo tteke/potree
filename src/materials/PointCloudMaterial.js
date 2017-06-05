@@ -127,7 +127,8 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			returnNumber: 		{ type: "f", value: [] },
 			numberOfReturns: 	{ type: "f", value: [] },
 			pointSourceID: 		{ type: "f", value: [] },
-			indices: 			{ type: "fv", value: [] }
+			indices: 			{ type: "fv", value: [] },
+			random: 			{ type: "f", value: [] }
 		};
 		
 		this.uniforms = {
