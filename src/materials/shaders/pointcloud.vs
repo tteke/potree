@@ -43,6 +43,12 @@ uniform int clipMode;
 	uniform mat4 clipBoxes[max_clip_boxes];
 #endif
 
+#if defined use_snapshot
+	uniform mat4 snapView;
+	uniform mat4 snapProj;
+	uniform sampler2D snapshot;
+#endif
+
 uniform int clipPolygonCount;
 uniform int clipPolygonVCount[max_clip_polygons];
 uniform vec3 clipPolygons[max_clip_polygons * 8];
@@ -91,6 +97,8 @@ varying vec3	vViewPosition;
 varying float 	vRadius;
 varying vec3	vWorldPosition;
 varying vec3	vNormal;
+varying vec4	vSP;
+varying float 	vPointSize;
 
 
 // ---------------------
@@ -464,6 +472,7 @@ void main() {
 	vRadius = pointSize / projFactor;
 
 	gl_PointSize = pointSize;
+	vPointSize = gl_PointSize;
 
 	// ---------------------
 	// CLIPPING
@@ -499,5 +508,32 @@ void main() {
 			}
 			testInsideClipVolume(polyInsideAny);
 		}
+	#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+	#if defined(use_snapshot)
+
+		//vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+		//vViewPosition = mvPosition.xyz;
+		//gl_Position = projectionMatrix * mvPosition;
+
+		vec4 sp = snapProj * snapView * modelMatrix * vec4(position, 1.0);
+		vec2 uv = 0.5 * (sp.xy / sp.w) + 0.5;
+		vec4 col = texture2D(snapshot, uv);
+
+		vSP = sp;
+
+		vColor = col.rgb;
 	#endif
 }

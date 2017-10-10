@@ -140,7 +140,10 @@ module.exports = class PointCloudMaterial extends THREE.RawShaderMaterial {
 			wSourceID: { type: 'f', value: 0 },
 			useOrthographicCamera: { type: 'b', value: false },
 			orthoRange: { type: 'f', value: 10.0 },
-			clipMode: { type: 'i', value: 1 }
+			clipMode: { type: 'i', value: 1 },
+			snapshot: { type: 't', 	value: null },
+			snapView: { type: 'Matrix4f', 	value: [] },
+			snapProj: { type: 'Matrix4f', 	value: [] },
 		};
 
 		this.defaultAttributeValues.normal = [0, 0, 0];
@@ -208,6 +211,10 @@ module.exports = class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 		if (this._useEDL) {
 			defines += '#define use_edl\n';
+		}
+
+		if(this._useSnapshot){
+			defines += "#define use_snapshot\n";
 		}
 
 		if (this._pointColorType === PointColorType.RGB) {
@@ -373,6 +380,17 @@ module.exports = class PointCloudMaterial extends THREE.RawShaderMaterial {
 			type: 'material_property_changed',
 			target: this
 		});
+	}
+
+	get useSnapshot(){
+		return this._useSnapshot;
+	}
+
+	set useSnapshot(value){
+		if(this._useSnapshot !== value){
+			this._useSnapshot = value;
+			this.updateShaderSource();
+		}
 	}
 
 	get spacing () {

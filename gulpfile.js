@@ -30,7 +30,7 @@ const through = require('through');
 	function createBrowserify (script, isMin) {
 		return browserify(createArgs(script))
 			.external('ws')
-			.transform(uglifyify, {global: true});
+			//.transform(uglifyify, {global: true});
 	}
 
 	function createArgs (script) {

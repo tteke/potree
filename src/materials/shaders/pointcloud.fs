@@ -24,6 +24,7 @@ uniform float screenWidth;
 uniform float screenHeight;
 
 uniform sampler2D depthMap;
+uniform sampler2D snapshot;
 
 varying vec3	vColor;
 varying float	vOpacity;
@@ -32,6 +33,8 @@ varying float	vLogDepth;
 varying vec3	vViewPosition;
 varying float	vRadius;
 varying vec3	vNormal;
+varying vec4	vSP;
+varying float 	vPointSize;
 
 float specularStrength = 1.0;
 
@@ -39,6 +42,37 @@ void main() {
 
 	vec3 color = vColor;
 	float depth = gl_FragCoord.z;
+
+	#if defined(use_snapshot)
+		vec2 uv = 0.5 * (vSP.xy / vSP.w) + 0.5;
+		//vec2 screenPos = vec2(screenWidth, screenHeight) * uv;
+		//vec2 offset = (gl_FragCoord.xy - screenPos);
+
+		// gl_PointCoord;
+
+		vec2 pc = vec2(
+			gl_PointCoord.x - 0.5,
+			(1.0 - gl_PointCoord.y) - 0.5
+		);
+		vec2 offset = (pc * vPointSize) / vec2(screenWidth, screenHeight);
+
+
+		//uv = (screenPos) / vec2(screenWidth, screenHeight);
+		uv = uv + offset;
+
+
+		//gl_FragCoord;
+
+		vec4 tc = texture2D(snapshot, uv);
+		color = tc.rgb;
+
+		if(tc.a == 0.0){
+			discard;
+			return;
+		}
+
+		//color = vec3(uv, 0.0);
+	#endif
 
 	#if defined(circle_point_shape) || defined(paraboloid_point_shape) || defined (weighted_splats)
 		float u = 2.0 * gl_PointCoord.x - 1.0;

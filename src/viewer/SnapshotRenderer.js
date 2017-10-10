@@ -2,13 +2,14 @@ const EyeDomeLightingMaterial = require('../materials/EyeDomeLightingMaterial');
 const THREE = require('three');
 const screenPass = require('../utils/screenPass');
 
-class EDLRenderer {
+class SnapshotRenderer {
 	constructor (viewer) {
 		this.viewer = viewer;
 
 		this.edlMaterial = null;
 		this.attributeMaterials = [];
 
+		this.snapshot = null;
 		this.rtColor = null;
 		this.gl = viewer.renderer.context;
 
@@ -127,7 +128,17 @@ class EDLRenderer {
 			material.spacing = pointcloud.pcoGeometry.spacing * Math.max(pointcloud.scale.x, pointcloud.scale.y, pointcloud.scale.z);
 			// material.near = camera.near;
 			// material.far = camera.far;
-			material.useSnapshot = false;
+
+			if(this.snapshot && this.snapshot.renderTarget){
+				let snapView = this.snapshot.camera.matrixWorldInverse;
+				let snapProj = this.snapshot.camera.projectionMatrix;
+
+				material.uniforms.snapshot.value = this.snapshot.renderTarget.texture;
+				material.uniforms.snapView.value = snapView;
+				material.uniforms.snapProj.value = snapProj;
+				material.useSnapshot = true;
+			}
+			
 		}
 
 		viewer.renderer.render(viewer.scene.scenePointCloud, camera, this.rtColor);
@@ -174,4 +185,4 @@ class EDLRenderer {
 	}
 };
 
-module.exports = EDLRenderer;
+module.exports = SnapshotRenderer;
