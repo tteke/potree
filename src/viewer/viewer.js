@@ -37,7 +37,6 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		this.server = null;
 
 		this.fov = 60;
-		//this.clipMode = Potree.ClipMode.HIGHLIGHT_INSIDE;
 		this.isFlipYZ = false;
 		this.useDEMCollisions = false;
 		this.generateDEM = false;
@@ -45,6 +44,9 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		this.edlStrength = 1.0;
 		this.edlRadius = 1.4;
 		this.useEDL = false;
+		this.clipTask = Potree.ClipTask.HIGHLIGHT;
+		this.clipMode = Potree.ClipMode.INSIDE_ANY;
+
 		this.classifications = {
 			0: { visible: true, name: 'never classified' },
 			1: { visible: true, name: 'unclassified' },
@@ -161,7 +163,6 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			this.setEDLEnabled(false);
 			this.setEDLRadius(1.4);
 			this.setEDLStrength(0.4);
-			this.clippingTool.setClipMode(Potree.ClipMode.HIGHLIGHT);
 			this.setPointBudget(1*1000*1000);
 			this.setShowBoundingBox(false);
 			this.setFreeze(false);
@@ -316,8 +317,26 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		$('#potree_description')[0].innerHTML = value;
 	};
 
+	getClipTask(){
+		return this.clipTask;
+	}
+
+	setClipTask(clipTask){
+		if(this.clipTask !== clipTask){
+			this.clipTask = clipTask;
+			this.dispatchEvent({type: "clip_task_changed", viewer: this});
+		}
+	}
+
+	getClipMode(){
+		return this.clipMode;
+	}
+
 	setClipMode(clipMode){
-		this.clippingTool.setClipMode(clipMode);
+		if(this.clipMode !== clipMode){
+			this.clipMode = clipMode;
+			this.dispatchEvent({type: "clip_mode_changed", viewer: this});
+		}
 	}
 
 	setNavigationMode (value) {
@@ -1213,7 +1232,7 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 				let boxPosition = box.getWorldPosition();
 				let boxMatrixWorld = new THREE.Matrix4().compose(boxPosition, box.getWorldQuaternion(), box.children[0].scale);
 				let boxInverse = new THREE.Matrix4().getInverse(boxMatrixWorld);
-				return {inverse: boxInverse, position: boxPosition};
+				return {matrix: boxMatrixWorld, inverse: boxInverse, position: boxPosition};
 			});
 
 			// extraordinary clip boxes (volume, profile)
@@ -1226,7 +1245,7 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 				box.updateMatrixWorld();
 				let boxInverse = new THREE.Matrix4().getInverse(box.matrixWorld);
 				let boxPosition = box.getWorldPosition();
-				return {inverse: boxInverse, position: boxPosition};
+				return {matrix: box.matrixWorld, inverse: boxInverse, position: boxPosition};
 			}));
 
 			// clip polygons

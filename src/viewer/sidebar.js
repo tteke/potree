@@ -402,17 +402,29 @@ initSidebar = (viewer) => {
 		});
 
 		{
-			let elClipModes = $("#optClipMode");
-			elClipModes.selectgroup({title: "Clip Mode"});
+			let elClipModes = $("#clip_whattodo");
+			elClipModes.selectgroup({title: "What to do:"});
 
 			elClipModes.find("input").click( (e) => {
-				viewer.clippingTool.setClipMode(Potree.ClipMode[e.target.value]);
+				viewer.setClipTask(Potree.ClipTask[e.target.value]);
+			});
+
+			let currentClipTask = Object.keys(Potree.ClipTask)
+				.find(key => Potree.ClipTask[key] === viewer.getClipTask());
+			elClipModes.find(`input[value=${currentClipTask}]`).trigger("click");
+		}
+
+		{
+			let elClipModes = $("#clip_which");
+			elClipModes.selectgroup({title: "Which points to show:"});
+
+			elClipModes.find("input").click( (e) => {
+				viewer.setClipMode(Potree.ClipMode[e.target.value]);
 			});
 
 			let currentClipMode = Object.keys(Potree.ClipMode)
-				.filter(key => Potree.ClipMode[key] === viewer.clippingTool.clipMode);
+				.find(key => Potree.ClipMode[key] === viewer.getClipMode());
 			elClipModes.find(`input[value=${currentClipMode}]`).trigger("click");
-
 		}
 
 		let clippingToolBar = $("#clipping_tools");

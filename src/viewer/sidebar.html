@@ -84,11 +84,19 @@
 			<li id="clipping_tools"></li>
 
 			<li>
-				<selectgroup id="optClipMode">
-					<option id="clip_option_none" value="DISABLED">None</option>
-					<option id="clip_option_highlight" value="HIGHLIGHT">Highlight</option>
-					<option id="clip_option_inside" value="INSIDE">Inside</option>
-					<option id="clip_option_outside" value="OUTSIDE">Outside</option>
+				<selectgroup id="clip_whattodo">
+					<option id="clip_whattodo_nothing" value="NOTHING">Nothing</option>
+					<option id="clip_whattodo_highlight" value="HIGHLIGHT">Highlight</option>
+					<option id="clip_whattodo_show" value="SHOW">Show</option>
+					<option id="clip_whattodo_hide" value="HIDE">Hide</option>
+				</selectgroup>
+			</li>
+
+			<li>
+				<selectgroup id="clip_which">
+					<option id="clip_which_inside_any" value="INSIDE_ANY">Inside Any</option>
+					<option id="clip_which_inside_all" value="INSIDE_ALL">Inside All</option>
+					<option id="clip_which_outside" value="OUTSIDE">Outside</option>
 				</selectgroup>
 			</li>
 			

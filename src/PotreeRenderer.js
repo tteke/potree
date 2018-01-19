@@ -759,11 +759,10 @@ Potree.Renderer = class Renderer {
 					`#define num_shadowmaps ${shadowMaps.length}`,
 					`#define num_snapshots ${numSnapshots}`,
 					`#define num_clipboxes ${numClipBoxes}`,
-					`#define num_clippolygons ${numClipPolygons}`,
+					`#define num_clippolygons ${numClipPolygons}`
 				];
 
-				//vs = `#define num_shadowmaps ${shadowMaps.length}\n` + vs;
-				//fs = `#define num_shadowmaps ${shadowMaps.length}\n` + fs;
+				
 
 				let definesString = defines.join("\n");
 
@@ -835,7 +834,10 @@ Potree.Renderer = class Renderer {
 				shader.setUniform("uUseOrthographicCamera", false);
 			}
 
-			shader.setUniform1i("clipMode", material.clipMode);
+			let numClipElements = material.clipBoxes.length + material.clipPolygons.length;
+			let clipTask = (numClipElements > 0) ? viewer.clipTask : Potree.ClipTask.NOTHING;
+			shader.setUniform1i("clipTask", clipTask);
+			shader.setUniform1i("clipMode", viewer.clipMode);
 
 			if (material.clipBoxes && material.clipBoxes.length > 0) {
 				

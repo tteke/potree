@@ -1,10 +1,16 @@
 
 
-Potree.ClipMode = {
-	DISABLED: 0,
+Potree.ClipTask = {
+	NOTHING: 0,
 	HIGHLIGHT: 1,
-	INSIDE: 2,
-	OUTSIDE: 3
+	HIDE: 2,
+	SHOW: 3
+}
+
+Potree.ClipMode = {
+	INSIDE_ANY: 0,
+	INSIDE_ALL: 1,
+	OUTSIDE: 2,
 };
 
 Potree.ClippingTool = class ClippingTool extends THREE.EventDispatcher{

@@ -192,6 +192,8 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this._pointColorType = Potree.PointColorType.RGB;
 		this._useClipBox = false;
 		this.numClipBoxes = 0;
+		this.clipBoxes = [];
+		this.clipPolygons = [];
 		this._weighted = false;
 		this._gradient = Potree.Gradients.SPECTRAL;
 		this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
@@ -263,7 +265,6 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			wReturnNumber:		{ type: "f", value: 0 },
 			wSourceID:			{ type: "f", value: 0 },
 			useOrthographicCamera: { type: "b", value: false },
-			clipMode:			{ type: "i", value: 1 },
 			uSnapshot:			{ type: "tv", value: [] },
 			uSnapshotDepth:		{ type: "tv", value: [] },
 			uSnapView:			{ type: "Matrix4fv", value: [] },
@@ -556,15 +557,6 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			this.updateShaderSource();
 		}
 	}
-
-	get clipMode() {
-		return this.uniforms.clipMode.value;
-	}
-
-	set clipMode(mode) {
-		this.uniforms.clipMode.value = mode;
-	}
-
 
 	get weighted(){
 		return this._weighted;

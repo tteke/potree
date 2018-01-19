@@ -5,6 +5,15 @@ precision mediump int;
 #define max_clip_polygons 8
 #define PI 3.141592653589793
 
+#define CLIPTASK_NONE 0
+#define CLIPTASK_HIGHLIGHT 1
+#define CLIPTASK_HIDE 2
+#define CLIPTASK_SHOW 3
+
+#define CLIPMODE_INSIDE_ANY 0
+#define CLIPMODE_INSIDE_ALL 1
+#define CLIPMODE_OUTSIDE 2
+
 attribute vec3 position;
 attribute vec3 color;
 attribute float intensity;
@@ -29,6 +38,7 @@ uniform bool uUseOrthographicCamera;
 uniform float uOrthoWidth;
 uniform float uOrthoHeight;
 
+uniform int clipTask;
 uniform int clipMode;
 #if defined(num_clipboxes) && num_clipboxes > 0
 	uniform mat4 clipBoxes[num_clipboxes];
@@ -498,14 +508,6 @@ bool pointInClipPolygon(vec3 point, int polyIdx) {
 }
 #endif
 
-void testInsideClipVolume(bool inside) {
-	if(inside && clipMode == 2 || !inside && clipMode == 3) {
-		gl_Position = vec4(1000.0, 1000.0, 1000.0, 1.0);
-	} else if(clipMode == 1 && inside) {
-		vColor.r += 0.5;
-	}
-}
-
 vec3 getColor(){
 	vec3 color;
 	
@@ -586,6 +588,18 @@ float getPointSize(){
 	return pointSize;
 }
 
+bool clipTest(bool insideAny, bool insideAll) {
+	if(clipMode == CLIPMODE_INSIDE_ANY && insideAny){
+		return true;
+	}else if(clipMode == CLIPMODE_INSIDE_ALL && insideAll){
+		return true;
+	}else if(clipMode == CLIPMODE_OUTSIDE && !insideAny){
+		return true;
+	}
+
+	return false;
+}
+
 void doClipping(){
 
 	#if !defined color_type_composite
@@ -597,51 +611,46 @@ void doClipping(){
 		}
 	#endif
 
+	bool insideAny = false;
+	bool insideAll = true;
+
 	#if defined(num_clipboxes) && num_clipboxes > 0
-		if(clipMode != 0) {
-			bool insideAny = false;
-			for(int i = 0; i < num_clipboxes; i++){
-				vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4( position, 1.0 );
-				bool inside = -0.5 <= clipPosition.x && clipPosition.x <= 0.5;
-				inside = inside && -0.5 <= clipPosition.y && clipPosition.y <= 0.5;
-				inside = inside && -0.5 <= clipPosition.z && clipPosition.z <= 0.5;
-				insideAny = insideAny || inside;
-			}	
-			testInsideClipVolume(insideAny);
+		for(int i = 0; i < num_clipboxes; i++){
+			vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4( position, 1.0 );
+			bool inside = -0.5 <= clipPosition.x && clipPosition.x <= 0.5;
+			inside = inside && -0.5 <= clipPosition.y && clipPosition.y <= 0.5;
+			inside = inside && -0.5 <= clipPosition.z && clipPosition.z <= 0.5;
+
+			insideAny = insideAny || inside;
+			insideAll = insideAll && inside;
 		}
 	#endif
 
 	#if defined(num_clippolygons) && num_clippolygons > 0
-
-	
 		if(clipMode != 0) {
-			bool polyInsideAny = false;
 			for(int i = 0; i < num_clippolygons; i++) {
-				polyInsideAny = polyInsideAny || pointInClipPolygon(position, i);
+				bool inside = pointInClipPolygon(position, i);
+				
+				insideAny = insideAny || inside;
+				insideAll = insideAll && inside;
 			}
-			testInsideClipVolume(polyInsideAny);
 		}
-	#endif	
+	#endif
+
+	bool clip = clipTest(insideAny, insideAll);
+
+	if(clip && clipTask == CLIPTASK_HIGHLIGHT){
+		vColor.r += 0.5;
+	}else if(clip && clipTask == CLIPTASK_HIDE){
+		gl_Position = vec4(1000.0, 1000.0, 1000.0, 1.0);
+	}else if(!clip && clipTask == CLIPTASK_SHOW){
+		gl_Position = vec4(1000.0, 1000.0, 1000.0, 1.0);
+	}
 }
 
-//float step(float edge, float v){
-//	return v < edge ? 0.0 : 1.0;
-//}
-
-float linearStep(float min, float max, float v){
-	return clamp((v - min) / (max - min), 0.0, 1.0);
-}
 
 
-// 
-// ##     ##    ###    #### ##    ## 
-// ###   ###   ## ##    ##  ###   ## 
-// #### ####  ##   ##   ##  ####  ## 
-// ## ### ## ##     ##  ##  ## ## ## 
-// ##     ## #########  ##  ##  #### 
-// ##     ## ##     ##  ##  ##   ### 
-// ##     ## ##     ## #### ##    ## 
-//
+
 
 void main() {
 	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
@@ -663,72 +672,4 @@ void main() {
 	doClipping();
 
 	
-	
-
-
-	
-
-	#if defined(num_snapshots) && num_snapshots > 0
-
-		for(int i = 0; i < num_snapshots; i++){
-			vSnapProjected[i] = uSnapProj[i] * uSnapView[i] * modelMatrix * vec4(position, 1.0);	
-			vSnapProjectedDistance[i] = -(uSnapView[i] * modelMatrix * vec4(position, 1.0)).z;
-		}
-		
-	#endif
-
-
-
-	#if defined(num_shadowmaps) && num_shadowmaps > 0
-
-		const float sm_near = 0.1;
-		const float sm_far = 1000.0;
-
-		for(int i = 0; i < num_shadowmaps; i++){
-			vec3 viewPos = (uShadowWorldView[i] * vec4(position, 1.0)).xyz;
-			float distanceToLight = length(viewPos);
-			float u = atan(viewPos.y, viewPos.x) / PI;
-			float v = atan(viewPos.z, length(viewPos.xy)) / PI;
-			float distance = length(viewPos);
-			float depth = ((distance - sm_near) / (sm_far - sm_near));
-
-			vec2 uv = vec2(u, v) * 0.5 + 0.5;
-			vec2 sampleStep = vec2(1.0 / (4.0*1024.0), 1.0 / (4.0*1024.0));
-
-			vec2 sampleLocations[9];
-			sampleLocations[0] = vec2(0.0, 0.0);
-			sampleLocations[1] = sampleStep;
-			sampleLocations[2] = -sampleStep;
-			sampleLocations[3] = vec2(sampleStep.x, -sampleStep.y);
-			sampleLocations[4] = vec2(-sampleStep.x, sampleStep.y);
-
-			sampleLocations[5] = vec2(0.0, sampleStep.y);
-			sampleLocations[6] = vec2(0.0, -sampleStep.y);
-			sampleLocations[7] = vec2(sampleStep.x, 0.0);
-			sampleLocations[8] = vec2(-sampleStep.x, 0.0);
-
-			float visible_samples = 0.0;
-			float sumSamples = 0.0;
-
-			float bias = vRadius * 1.0;
-			for(int j = 0; j < 9; j++){
-
-				vec2 moments = texture2D(uShadowMap[j], uv + sampleLocations[j]).xy + sm_near;
-				//float p = smoothstep(distanceToLight - 10.0 * bias, distanceToLight, moments.x);
-				float p = step(distanceToLight - 5.0 * bias, moments.x);
-
-				visible_samples += (1.0 - p);
-
-
-				sumSamples = sumSamples + 1.0;
-			}
-
-			float coverage = 1.0 - visible_samples / sumSamples;
-			float shade = coverage * 0.5 + 0.5;
-
-			vColor = vColor * shade + uShadowColor * (1.0 - shade);
-		}
-
-	#endif
-
 }
