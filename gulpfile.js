@@ -81,9 +81,9 @@ var paths = {
 		"src/viewer/View.js",
 		"src/viewer/Scene.js",
 		"src/viewer/viewer.js",
-		"src/viewer/profile.js",
+		// "src/viewer/profile.js",
 		"src/viewer/map.js",
-		"src/viewer/sidebar.js",
+		// "src/viewer/sidebar.js",
 		"src/viewer/PropertiesPanel.js",
 		"src/viewer/NavigationCube.js",
 		"src/stuff/HoverMenu.js",
@@ -97,7 +97,7 @@ var paths = {
 	],
 	html: [
 		"src/viewer/potree.css",
-		"src/viewer/sidebar.html",
+		// "src/viewer/sidebar.html",
 		"src/viewer/profile.html"
 	],
 	resources: [

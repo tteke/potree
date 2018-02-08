@@ -14,6 +14,10 @@ Potree.Annotation = class extends THREE.EventDispatcher {
 		} else {
 			this.position = new THREE.Vector3(...args.position);
 		}
+		
+		if (args.sgID) {
+			this.sgID = args.sgID;
+		}
 
 		this.cameraPosition = (args.cameraPosition instanceof Array)
 			? new THREE.Vector3().fromArray(args.cameraPosition) : args.cameraPosition;

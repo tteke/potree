@@ -10,23 +10,23 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		
 		try{
 
-		{ // generate missing dom hierarchy
-			if ($(domElement).find('#potree_map').length === 0) {
-				let potreeMap = $(`
-					<div id="potree_map" class="mapBox" style="position: absolute; left: 50px; top: 50px; width: 400px; height: 400px; display: none">
-						<div id="potree_map_header" style="position: absolute; width: 100%; height: 25px; top: 0px; background-color: rgba(0,0,0,0.5); z-index: 1000; border-top-left-radius: 3px; border-top-right-radius: 3px;">
-						</div>
-						<div id="potree_map_content" class="map" style="position: absolute; z-index: 100; top: 25px; width: 100%; height: calc(100% - 25px); border: 2px solid rgba(0,0,0,0.5); box-sizing: border-box;"></div>
-					</div>
-				`);
-				$(domElement).append(potreeMap);
-			}
+		// { // generate missing dom hierarchy
+		// 	if ($(domElement).find('#potree_map').length === 0) {
+		// 		let potreeMap = $(`
+		// 			<div id="potree_map" class="mapBox" style="position: absolute; left: 50px; top: 50px; width: 400px; height: 400px; display: none">
+		// 				<div id="potree_map_header" style="position: absolute; width: 100%; height: 25px; top: 0px; background-color: rgba(0,0,0,0.5); z-index: 1000; border-top-left-radius: 3px; border-top-right-radius: 3px;">
+		// 				</div>
+		// 				<div id="potree_map_content" class="map" style="position: absolute; z-index: 100; top: 25px; width: 100%; height: calc(100% - 25px); border: 2px solid rgba(0,0,0,0.5); box-sizing: border-box;"></div>
+		// 			</div>
+		// 		`);
+		// 		$(domElement).append(potreeMap);
+		// 	}
 
-			if ($(domElement).find('#potree_description').length === 0) {
-				let potreeDescription = $(`<div id="potree_description" class="potree_info_text"></div>`);
-				$(domElement).append(potreeDescription);
-			}
-		}
+		// 	if ($(domElement).find('#potree_description').length === 0) {
+		// 		let potreeDescription = $(`<div id="potree_description" class="potree_info_text"></div>`);
+		// 		$(domElement).append(potreeDescription);
+		// 	}
+		// }
 
 		this.pointCloudLoadedCallback = args.onPointCloudLoaded || function () {};
 
@@ -176,8 +176,6 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			this.setBackground('gradient');
 
 			this.scaleFactor = 1;
-
-			this.loadSettingsFromURL();
 		}
 
 		// start rendering!
@@ -185,7 +183,7 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			requestAnimationFrame(this.loop.bind(this));
 		}
 
-		this.loadGUI = this.loadGUI.bind(this);
+		// this.loadGUI = this.loadGUI.bind(this);
 
 		}catch(e){
 			this.onCrash(e);
@@ -322,10 +320,6 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		this.background = bg;
 		this.dispatchEvent({'type': 'background_changed', 'viewer': this});
 	}
-
-	setDescription (value) {
-		$('#potree_description')[0].innerHTML = value;
-	};
 
 	setNavigationMode (value) {
 		this.scene.view.navigationMode = value;
@@ -582,12 +576,6 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		}
 	};
 
-	showAbout () {
-		$(function () {
-			$('#about-panel').dialog();
-		});
-	};
-
 	getBoundingBox (pointclouds) {
 		return this.scene.getBoundingBox(pointclouds);
 	};
@@ -687,99 +675,6 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			pointcloud.material.useOrthographicCamera = mode == Potree.CameraMode.ORTHOGRAPHIC;
 		}
 	}
-	
-	loadSettingsFromURL(){
-		if(Potree.utils.getParameterByName("pointSize")){
-			this.setPointSize(parseFloat(Potree.utils.getParameterByName("pointSize")));
-		}
-		
-		if(Potree.utils.getParameterByName("FOV")){
-			this.setFOV(parseFloat(Potree.utils.getParameterByName("FOV")));
-		}
-		
-		if(Potree.utils.getParameterByName("opacity")){
-			this.setOpacity(parseFloat(Potree.utils.getParameterByName("opacity")));
-		}
-		
-		if(Potree.utils.getParameterByName("edlEnabled")){
-			let enabled = Potree.utils.getParameterByName("edlEnabled") === "true";
-			this.setEDLEnabled(enabled);
-		}
-
-		if (Potree.utils.getParameterByName('edlRadius')) {
-			this.setEDLRadius(parseFloat(Potree.utils.getParameterByName('edlRadius')));
-		}
-
-		if (Potree.utils.getParameterByName('edlStrength')) {
-			this.setEDLStrength(parseFloat(Potree.utils.getParameterByName('edlStrength')));
-		}
-
-		if (Potree.utils.getParameterByName('pointBudget')) {
-			this.setPointBudget(parseFloat(Potree.utils.getParameterByName('pointBudget')));
-		}
-
-		if (Potree.utils.getParameterByName('showBoundingBox')) {
-			let enabled = Potree.utils.getParameterByName('showBoundingBox') === 'true';
-			if (enabled) {
-				this.setShowBoundingBox(true);
-			} else {
-				this.setShowBoundingBox(false);
-			}
-		}
-
-		if (Potree.utils.getParameterByName('material')) {
-			let material = Potree.utils.getParameterByName('material');
-			this.setMaterial(material);
-		}
-
-		if (Potree.utils.getParameterByName('pointSizing')) {
-			let sizing = Potree.utils.getParameterByName('pointSizing');
-			this.setPointSizing(sizing);
-		}
-
-		if (Potree.utils.getParameterByName('quality')) {
-			let quality = Potree.utils.getParameterByName('quality');
-			this.setQuality(quality);
-		}
-
-		if (Potree.utils.getParameterByName('position')) {
-			let value = Potree.utils.getParameterByName('position');
-			value = value.replace('[', '').replace(']', '');
-			let tokens = value.split(';');
-			let x = parseFloat(tokens[0]);
-			let y = parseFloat(tokens[1]);
-			let z = parseFloat(tokens[2]);
-
-			this.scene.view.position.set(x, y, z);
-		}
-
-		if (Potree.utils.getParameterByName('target')) {
-			let value = Potree.utils.getParameterByName('target');
-			value = value.replace('[', '').replace(']', '');
-			let tokens = value.split(';');
-			let x = parseFloat(tokens[0]);
-			let y = parseFloat(tokens[1]);
-			let z = parseFloat(tokens[2]);
-
-			this.scene.view.lookAt(new THREE.Vector3(x, y, z));
-		}
-
-		if (Potree.utils.getParameterByName('background')) {
-			let value = Potree.utils.getParameterByName('background');
-			this.setBackground(value);
-		}
-
-		// if(Potree.utils.getParameterByName("elevationRange")){
-		//	let value = Potree.utils.getParameterByName("elevationRange");
-		//	value = value.replace("[", "").replace("]", "");
-		//	let tokens = value.split(";");
-		//	let x = parseFloat(tokens[0]);
-		//	let y = parseFloat(tokens[1]);
-		//
-		//	this.setElevationRange(x, y);
-		//	//this.scene.view.target.set(x, y, z);
-		// }
-	};
 
 	// ------------------------------------------------------------------------------------
 	// Viewer Internals
@@ -824,105 +719,6 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			this.earthControls.addEventListener('end', this.enableAnnotations.bind(this));
 		}
 	};
-
-	toggleSidebar () {
-		let renderArea = $('#potree_render_area');
-		let isVisible = renderArea.css('left') !== '0px';
-
-		if (isVisible) {
-			renderArea.css('left', '0px');
-		} else {
-			renderArea.css('left', '300px');
-		}
-	};
-
-	toggleMap () {
-		// let map = $('#potree_map');
-		// map.toggle(100);
-
-		if (this.mapView) {
-			this.mapView.toggle();
-		}
-	};
-
-	onGUILoaded(callback){
-		if(this.guiLoaded){
-			callback();
-		}else{
-			this.guiLoadTasks.push(callback);
-		}
-	}
-
-	loadGUI(callback){
-		let viewer = this;
-		let sidebarContainer = $('#potree_sidebar_container');
-		sidebarContainer.load(new URL(Potree.scriptPath + '/sidebar.html').href, () => {
-			sidebarContainer.css('width', '300px');
-			sidebarContainer.css('height', '100%');
-
-			let imgMenuToggle = document.createElement('img');
-			imgMenuToggle.src = new URL(Potree.resourcePath + '/icons/menu_button.svg').href;
-			imgMenuToggle.onclick = this.toggleSidebar;
-			imgMenuToggle.classList.add('potree_menu_toggle');
-
-			let imgMapToggle = document.createElement('img');
-			imgMapToggle.src = new URL(Potree.resourcePath + '/icons/map_icon.png').href;
-			imgMapToggle.style.display = 'none';
-			imgMapToggle.onclick = e => { this.toggleMap(); };
-			imgMapToggle.id = 'potree_map_toggle';
-
-			viewer.renderArea.insertBefore(imgMapToggle, viewer.renderArea.children[0]);
-			viewer.renderArea.insertBefore(imgMenuToggle, viewer.renderArea.children[0]);
-
-			this.mapView = new Potree.MapView(this);
-			this.mapView.init();
-
-			i18n.init({
-				lng: 'en',
-				resGetPath: Potree.resourcePath + '/lang/__lng__/__ns__.json',
-				preload: ['en', 'fr', 'de', 'jp'],
-				getAsync: true,
-				debug: false
-			}, function (t) {
-				// Start translation once everything is loaded
-				$('body').i18n();
-			});
-
-			$(() => {
-				initSidebar(this);
-			});
-
-			let elProfile = $('<div>').load(new URL(Potree.scriptPath + '/profile.html').href, () => {
-				$(document.body).append(elProfile.children());
-				this.profileWindow = new Potree.ProfileWindow(this);
-				this.profileWindowController = new Potree.ProfileWindowController(this);
-
-				$('#profile_window').draggable({
-					handle: $('#profile_titlebar'),
-					containment: $(document.body)
-				});
-				$('#profile_window').resizable({
-					containment: $(document.body),
-					handles: 'n, e, s, w'
-				});
-
-				if (callback) {
-					$(callback);
-				}
-
-				this.guiLoaded = true;
-
-				for(let task of this.guiLoadTasks){
-					task();
-				}
-			});
-		});
-	}
-
-	setLanguage (lang) {
-		i18n.setLng(lang);
-		$('body').i18n();
-	}
 
 	setServer (server) {
 		this.server = server;
